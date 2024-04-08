@@ -1,0 +1,71 @@
+package com.compi1.parsers;
+import java_cup.runtime.*;
+import java.util.List;
+import java.util.ArrayList;
+
+class ActionsParser;
+
+parser code {:
+    public ActionsParser(ActionsLexer lex, ComplexSymbolFactory sf) {
+        super(lex,sf);
+    }
+    public void syntax_error(Symbol cur_token) {
+        throw new Error("Syntax error in token '" +symbl_name_from_id(cur_token.sym) + "':'" + cur_token.value
+        +"' at line: " + cur_token.left + ", col:" + cur_token.right);
+    }
+:};
+
+terminal
+// NOMBRES DE ACCIONES
+NEW_SITE, DELETE_SITE, NEW_PAGE, MODIFY_PAGE, DELETE_PAGE, ADD_COMPONENT, DELETE_COMPONENT, MODIFY_COMPONENT,
+// NOMBRES DE PARAMETROS
+ID, CREATION_USER, CREATION_DATE, MODIFICATION_DATE, MODIFICATION_USER, PARAM_TITLE, SITE, PARENT, PARAM_PAGE, CLASS,
+// NOMBRES  DE ATRIBUTOS COMPONENTES
+TEXT, ALIGNMENT, COLOR, SOURCE, HEIGHT, WIDTH, COMP_TAGS,
+// NOMBRES DE ETIQUETAS XML
+ACTION, ACTIONS, PARAMETERS, PARAMETER, TAGS, TAG, ATTRIBUTES, ATTRIBUTE, NAME, VALUE,
+// SIMBOLOS
+EQUALS, LESS_THAN, MORE_THAN, SLASH,
+// VALUES
+QUOTE_VALUE, BRACKET_VALUE;
+
+nonterminal actions, _actions, one_action, action_name,
+params, _params, param, param_name, tags, tag, _tags, attributes, _attributes, attribute, attr_name;
+
+start with actions;
+
+actions ::= LESS_THAN ACTIONS MORE_THAN one_action _actions LESS_THAN SLASH ACTIONS MORE_THAN
+    | one_action;
+
+_actions ::= one_action _actions
+    | ;
+
+one_action ::= LESS_THAN ACTION NAME EQUALS action_name MORE_THAN params attributes tags LESS_THAN SLASH ACTION MORE_THAN;
+
+action_name ::= NEW_SITE | DELETE_SITE | NEW_PAGE | MODIFY_PAGE | DELETE_PAGE | ADD_COMPONENT | DELETE_COMPONENT | MODIFY_COMPONENT;
+
+params ::=  LESS_THAN PARAMETERS MORE_THAN param _params LESS_THAN SLASH PARAMETERS MORE_THAN;
+_params ::= param _params
+    | ;
+
+param ::= LESS_THAN PARAMETER NAME EQUALS param_name MORE_THAN BRACKET_VALUE LESS_THAN SLASH PARAMETER MORE_THAN;
+
+param_name ::= ID | CREATION_USER | CREATION_DATE | MODIFICATION_DATE | MODIFICATION_USER | PARAM_TITLE | SITE
+| PARENT | PARAM_PAGE | CLASS;
+
+attributes ::= LESS_THAN ATTRIBUTES MORE_THAN attribute _attributes LESS_THAN SLASH ATTRIBUTES MORE_THAN
+    | ;
+_attributes ::= attribute _attributes
+    | ;
+
+attribute ::= LESS_THAN ATTRIBUTE NAME EQUALS attr_name MORE_THAN BRACKET_VALUE LESS_THAN SLASH ATTRIBUTE MORE_THAN;
+
+attr_name ::= TEXT | ALIGNMENT | COLOR | SOURCE | HEIGHT | WIDTH | PARENT | COMP_TAGS;
+
+tags ::= LESS_THAN TAGS MORE_THAN tag _tags LESS_THAN SLASH TAGS MORE_THAN
+    | ;
+_tags ::= LESS_THAN TAG VALUE EQUALS QUOTE_VALUE SLASH MORE_THAN _tags
+    | ;
+
+tag ::= LESS_THAN TAG VALUE EQUALS QUOTE_VALUE SLASH MORE_THAN;
+
