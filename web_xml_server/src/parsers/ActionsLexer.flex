@@ -62,13 +62,17 @@ bracketValue = "["[^\[\n\r]*"]"
     "\"ETIQUETAS\"" { return symbol(ActionsParserSym.COMP_TAGS); }
 
     // NOMBRES DE ETIQUETAS XML
+    "<acciones>" { return symbol(ActionsParserSym.ACTIONS_OP); }
+    "</acciones>" { return symbol(ActionsParserSym.ACTIONS_CL); }
     "accion" { return symbol(ActionsParserSym.ACTION); }
-    "acciones" { return symbol(ActionsParserSym.ACTIONS); }
-    "parametros" { return symbol(ActionsParserSym.PARAMETERS); }
-    "parametro" { return symbol(ActionsParserSym.PARAMETER); }
-    "etiquetas" { return symbol(ActionsParserSym.TAGS); }
+    "<parametros>" { return symbol(ActionsParserSym.PARAMS_OP); }
+    "</parametros>" { return symbol(ActionsParserSym.PARAMS_CL); }
+    "parametro" { return symbol(ActionsParserSym.PARAM); }
+    "<etiquetas>" { return symbol(ActionsParserSym.TAGS_OP); }
+    "</etiquetas>" { return symbol(ActionsParserSym.TAGS_CL); }
     "etiqueta" { return symbol(ActionsParserSym.TAG); }
-    "atributos" { return symbol(ActionsParserSym.ATTRIBUTES); }
+    "<atributos>" { return symbol(ActionsParserSym.ATTRIBUTES_OP); }
+    "</atributos>" { return symbol(ActionsParserSym.ATTRIBUTES_CL); }
     "atributo" { return symbol(ActionsParserSym.ATTRIBUTE); }
     "nombre" { return symbol(ActionsParserSym.NAME); }
     "valor" { return symbol(ActionsParserSym.VALUE); }

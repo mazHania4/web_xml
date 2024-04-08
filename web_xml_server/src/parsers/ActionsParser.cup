@@ -1,5 +1,6 @@
 package com.compi1.parsers;
 import java_cup.runtime.*;
+import com.compi1.model.*;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -23,7 +24,7 @@ ID, CREATION_USER, CREATION_DATE, MODIFICATION_DATE, MODIFICATION_USER, PARAM_TI
 // NOMBRES  DE ATRIBUTOS COMPONENTES
 TEXT, ALIGNMENT, COLOR, SOURCE, HEIGHT, WIDTH, COMP_TAGS,
 // NOMBRES DE ETIQUETAS XML
-ACTION, ACTIONS, PARAMETERS, PARAMETER, TAGS, TAG, ATTRIBUTES, ATTRIBUTE, NAME, VALUE,
+ACTIONS_OP, ACTIONS_CL, ACTION, PARAMS_OP, PARAMS_CL, PARAM, TAGS_OP, TAGS_CL, TAG, ATTRIBUTES_OP, ATTRIBUTES_CL, ATTRIBUTE, NAME, VALUE,
 // SIMBOLOS
 EQUALS, LESS_THAN, MORE_THAN, SLASH,
 // VALUES
@@ -34,38 +35,90 @@ params, _params, param, param_name, tags, tag, _tags, attributes, _attributes, a
 
 start with actions;
 
-actions ::= LESS_THAN ACTIONS MORE_THAN one_action _actions LESS_THAN SLASH ACTIONS MORE_THAN
-    | one_action;
+actions ::= ACTIONS_OP one_action:a _actions:a_list ACTIONS_CL
+        {: List<Action> actionList = (List<Action>) a_list;
+            actionList.addFirst((Action)a);
+            RESULT = actionList; :}
+    | one_action:a
+        {: List<Action> actionList = new ArrayList();
+            actionList.addFirst((Action)a);
+            RESULT = actionList; :};
 
-_actions ::= one_action _actions
-    | ;
+_actions ::= one_action:a _actions:a_list
+        {: List<Action> actionList = (List<Action>) a_list;
+                actionList.addFirst((Action)a);
+                RESULT = actionList; :}
+    |   {: RESULT = new ArrayList(); :};
 
-one_action ::= LESS_THAN ACTION NAME EQUALS action_name MORE_THAN params attributes tags LESS_THAN SLASH ACTION MORE_THAN;
+one_action ::= LESS_THAN ACTION NAME EQUALS action_name:n MORE_THAN params:p attributes:a tags:t LESS_THAN SLASH ACTION MORE_THAN
+        {: RESULT = Action.builder().params((List<Param>)p).attributes((List<Attr>)a).tags((List<String>)t).type((ActionType)n).build(); :} ;
 
-action_name ::= NEW_SITE | DELETE_SITE | NEW_PAGE | MODIFY_PAGE | DELETE_PAGE | ADD_COMPONENT | DELETE_COMPONENT | MODIFY_COMPONENT;
+action_name ::= NEW_SITE {: RESULT = ActionType.NEW_SITE; :}
+    | DELETE_SITE {: RESULT = ActionType.DELETE_SITE; :}
+    | NEW_PAGE {: RESULT = ActionType.NEW_PAGE; :}
+    | MODIFY_PAGE {: RESULT = ActionType.MODIFY_PAGE; :}
+    | DELETE_PAGE {: RESULT = ActionType.DELETE_PAGE; :}
+    | ADD_COMPONENT {: RESULT = ActionType.ADD_COMPONENT; :}
+    | DELETE_COMPONENT {: RESULT = ActionType.DELETE_COMPONENT; :}
+    | MODIFY_COMPONENT {: RESULT = ActionType.MODIFY_COMPONENT; :};
 
-params ::=  LESS_THAN PARAMETERS MORE_THAN param _params LESS_THAN SLASH PARAMETERS MORE_THAN;
-_params ::= param _params
-    | ;
+params ::=  PARAMS_OP param:p _params:p_list PARAMS_CL
+        {:List<Param> param_list = (List<Param>) p_list;
+            param_list.addFirst((Param)p);
+            RESULT = param_list; :};
+_params ::= param:p _params:p_list
+        {:List<Param> param_list = (List<Param>) p_list;
+            param_list.addFirst((Param)p);
+            RESULT = param_list; :}
+    |   {: RESULT = new ArrayList(); :};
 
-param ::= LESS_THAN PARAMETER NAME EQUALS param_name MORE_THAN BRACKET_VALUE LESS_THAN SLASH PARAMETER MORE_THAN;
+param ::= LESS_THAN PARAM NAME EQUALS param_name:n MORE_THAN BRACKET_VALUE:v LESS_THAN SLASH PARAM MORE_THAN
+        {: RESULT = Param.builder().type((ParamType)n).value((String)v).build(); :} ;
 
-param_name ::= ID | CREATION_USER | CREATION_DATE | MODIFICATION_DATE | MODIFICATION_USER | PARAM_TITLE | SITE
-| PARENT | PARAM_PAGE | CLASS;
+param_name ::= ID {: RESULT = ParamType.ID; :}
+    | CREATION_USER {: RESULT = ParamType.CREATION_USER; :}
+    | CREATION_DATE {: RESULT = ParamType.CREATION_DATE; :}
+    | MODIFICATION_DATE {: RESULT = ParamType.MODIFICATION_DATE; :}
+    | MODIFICATION_USER {: RESULT = ParamType.MODIFICATION_USER; :}
+    | PARAM_TITLE {: RESULT = ParamType.PARAM_TITLE; :}
+    | SITE {: RESULT = ParamType.SITE; :}
+    | PARENT {: RESULT = ParamType.PARENT; :}
+    | PARAM_PAGE {: RESULT = ParamType.PARAM_PAGE; :}
+    | CLASS {: RESULT = ParamType.CLASS; :};
 
-attributes ::= LESS_THAN ATTRIBUTES MORE_THAN attribute _attributes LESS_THAN SLASH ATTRIBUTES MORE_THAN
-    | ;
-_attributes ::= attribute _attributes
-    | ;
+attributes ::= ATTRIBUTES_OP attribute:a _attributes:a_list ATTRIBUTES_CL
+        {:List<Attr> attr_list = (List<Attr>) a_list;
+            attr_list.addFirst((Attr)a);
+            RESULT = attr_list; :}
+    |  {: RESULT = null; :};
+_attributes ::= attribute:a _attributes:a_list
+        {:List<Attr> attr_list = (List<Attr>) a_list;
+            attr_list.addFirst((Attr)a);
+            RESULT = attr_list; :}
+    |   {: RESULT = new ArrayList(); :};
 
-attribute ::= LESS_THAN ATTRIBUTE NAME EQUALS attr_name MORE_THAN BRACKET_VALUE LESS_THAN SLASH ATTRIBUTE MORE_THAN;
+attribute ::= LESS_THAN ATTRIBUTE NAME EQUALS attr_name:n MORE_THAN BRACKET_VALUE:v LESS_THAN SLASH ATTRIBUTE MORE_THAN
+        {: RESULT = Attr.builder().type((AttrType)n).value((String)v).build(); :} ;
 
-attr_name ::= TEXT | ALIGNMENT | COLOR | SOURCE | HEIGHT | WIDTH | PARENT | COMP_TAGS;
+attr_name ::= TEXT {: RESULT = AttrType.TEXT; :}
+    | ALIGNMENT {: RESULT = AttrType.ALIGNMENT; :}
+    | COLOR {: RESULT = AttrType.COLOR; :}
+    | SOURCE {: RESULT = AttrType.SOURCE; :}
+    | HEIGHT {: RESULT = AttrType.HEIGHT; :}
+    | WIDTH {: RESULT = AttrType.WIDTH; :}
+    | PARENT {: RESULT = AttrType.PARENT; :}
+    | COMP_TAGS {: RESULT = AttrType.COMP_TAGS; :};
 
-tags ::= LESS_THAN TAGS MORE_THAN tag _tags LESS_THAN SLASH TAGS MORE_THAN
-    | ;
-_tags ::= LESS_THAN TAG VALUE EQUALS QUOTE_VALUE SLASH MORE_THAN _tags
-    | ;
+tags ::= TAGS_OP tag:t _tags:t_list TAGS_CL
+        {:List<String> tag_list = (List<String>) t_list;
+                    tag_list.addFirst((String)t);
+                    RESULT = tag_list; :}
+    |  {: RESULT = null; :};
+_tags ::= tag:t _tags:t_list
+        {:List<String> tag_list = (List<String>) t_list;
+            tag_list.addFirst((String)t);
+            RESULT = tag_list; :}
+    |   {: RESULT = new ArrayList(); :};
 
-tag ::= LESS_THAN TAG VALUE EQUALS QUOTE_VALUE SLASH MORE_THAN;
+tag ::= LESS_THAN TAG VALUE EQUALS QUOTE_VALUE:v SLASH MORE_THAN {: RESULT = (String) v; :};
 
