@@ -1,4 +1,4 @@
-package com.compi1.model;
+package com.compi1.model.actions;
 
 import lombok.Builder;
 import lombok.Getter;

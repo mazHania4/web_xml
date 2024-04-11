@@ -1,4 +1,4 @@
-package com.compi1.model;
+package com.compi1.model.actions;
 
 public enum ActionType {
     NEW_SITE, DELETE_SITE, NEW_PAGE, MODIFY_PAGE, DELETE_PAGE, ADD_COMPONENT, MODIFY_COMPONENT, DELETE_COMPONENT;

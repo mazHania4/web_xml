@@ -1,6 +1,6 @@
 package com.compi1.parsers;
 import java_cup.runtime.*;
-import com.compi1.model.*;
+import com.compi1.model.actions.*;
 import java.util.List;
 import java.util.ArrayList;
 
