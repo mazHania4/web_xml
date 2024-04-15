@@ -4,6 +4,8 @@ import com.compi1.model.actions.Action;
 import com.compi1.model.actions.Param;
 import com.compi1.model.actions.ParamType;
 
+import java.io.*;
+
 public class ActionsController {
 
     private final SiteController sites;
@@ -13,7 +15,7 @@ public class ActionsController {
     public void execute(Action action) throws IllegalArgumentException {
         validateHasID(action);
         // each verifies that the necessary parameters/attributes are present
-        // the extra parameters/attributes just will be ignored
+        // and there are no extra parameters/attributes/tags unnecessary
         switch (action.getType()){
             case NEW_SITE -> sites.executeNEW(action);
             case DELETE_SITE -> sites.executeDELETE(action);
@@ -27,6 +29,7 @@ public class ActionsController {
     }
 
     private void validateHasID(Action action) throws IllegalArgumentException{
+        //verify id regex, id can't be 'site' or other files names saved in folder of a site
         int ids = 0;
         for (Param p: action.getParams() ) {
             if (p.getType().equals(ParamType.ID)) ids++;
@@ -36,8 +39,18 @@ public class ActionsController {
     }
 
     public ActionsController() {
-        sites = new SiteController();
-        pages = new PageController();
-        comps = new CompController();
+        FilesController files;
+        try {
+            FileInputStream fileInputStream = new FileInputStream(FilesController.rootFolder+"ids.ser");
+            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+            files = (FilesController) objectInputStream.readObject();
+            objectInputStream.close();
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println(" - Couldn't retrieve saved list of Ids, generating new empty lists - ");
+            files = new FilesController();
+        }
+        sites = new SiteController(files);
+        pages = new PageController(files);
+        comps = new CompController(files);
     }
 }

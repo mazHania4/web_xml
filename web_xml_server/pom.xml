@@ -26,6 +26,11 @@
             <artifactId>java-cup-runtime</artifactId>
             <version>11b-20160615-3</version>
         </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.16.1</version>
+        </dependency>
     </dependencies>
 
 </project>

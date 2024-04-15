@@ -4,34 +4,138 @@ import com.compi1.model.actions.Action;
 import com.compi1.model.actions.Attr;
 import com.compi1.model.actions.Param;
 import com.compi1.model.actions.ParamType;
+import com.compi1.model.sites.Alignment;
+import com.compi1.model.sites.Component;
+import com.compi1.model.sites.ComponentType;
+import com.compi1.model.sites.Page;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CompController {
 
-    public void executeADD(Action action) throws IllegalArgumentException {
-        validateADD_MODIFY(action);
-        //verifies if the page id exists (possibly uses the pageController)
-        //tries to get the page from the serialized
-        //verifies if the page has a component with the id
+    private final FilesController files;
 
+
+    public void executeADD(Action action) throws IllegalArgumentException {
+        System.out.println("\nADD COMP\n");
+        validateADD_MODIFY(action);
+        String cId = "", pId  = "", classN = "";
+        for (Param p: action.getParams() ) {
+            if (p.getType().equals(ParamType.ID))  cId = p.getValue();
+            if (p.getType().equals(ParamType.PARAM_PAGE))  pId = p.getValue();
+            if (p.getType().equals(ParamType.CLASS))  classN = p.getValue();
+        }
+        if (!files.pageIdExists(pId)) throw new IllegalArgumentException("ID: "+pId+" for pages not found");
+        Page page = files.getPage(pId);
+        List<Component> comps = page.getComponents();
+        for (Component c : comps){
+            if (c.getId().equals(cId)) throw new IllegalArgumentException("ID: "+cId+" for components already exists within the page");
+        }
+        Component component = createComponent(action, cId, classN);
+        page.getComponents().add(component);
+        files.rewritePage(page);
     }
 
     public void executeMODIFY(Action action) throws IllegalArgumentException {
+        System.out.println("\nREPLACE COMP\n");
         validateADD_MODIFY(action);
-        //verifies if the page id exists (possibly uses the pageController)
-        //tries to get the page from the serialized
-        //verifies if the page has a component with the id
-
+        String cId = "", pId  = "", classN = "";
+        for (Param p: action.getParams() ) {
+            if (p.getType().equals(ParamType.ID))  cId = p.getValue();
+            if (p.getType().equals(ParamType.PARAM_PAGE))  pId = p.getValue();
+            if (p.getType().equals(ParamType.CLASS))  classN = p.getValue();
+        }
+        if (!files.pageIdExists(pId)) throw new IllegalArgumentException("ID: "+pId+" for pages not found");
+        Page page = files.getPage(pId);
+        List<Component> comps = page.getComponents();
+        int i = validateGetCompI(comps, cId);
+        Component component = createComponent(action, cId, classN);
+        comps.remove(i);
+        comps.add(i, component);
+        files.rewritePage(page);
     }
 
     public void executeDELETE(Action action) throws IllegalArgumentException {
+        System.out.println("\nDELETE COMP\n");
         validateDELETE(action);
-        //verifies if the page id exists (possibly uses the pageController)
-        //tries to get the page from the serialized
-        //verifies if the page has a component with the id
+        String cId = "", pId  = "";
+        for (Param p: action.getParams() ) {
+            if (p.getType().equals(ParamType.ID))  cId = p.getValue();
+            if (p.getType().equals(ParamType.PARAM_PAGE))  pId = p.getValue();
+        }
+        if (!files.pageIdExists(pId)) throw new IllegalArgumentException("ID: "+pId+" for pages not found");
+        Page page = files.getPage(pId);
+        List<Component> comps = page.getComponents();
+        int i = validateGetCompI(comps, cId);
+        comps.remove(i);
+        files.rewritePage(page);
     }
 
+    private Component createComponent(Action action, String id, String className){
+        ComponentType type = null;
+        switch (className){
+            case "TITULO" -> type = ComponentType.TITLE;
+            case "PARRAFO" -> type = ComponentType.PARAGRAPH;
+            case "IMAGEN"-> type = ComponentType.IMG;
+            case "VIDEO" -> type = ComponentType.VIDEO;
+            case "MENU" -> type = ComponentType.MENU;
+        }
+        String text = "-", color = " ", align = "", src = "-", parent = "-", heightS = "", widthS = "", tagsS = "";
+        for (Attr a: action.getAttributes() ) {
+            switch (a.getType()){
+                case TEXT -> text = a.getValue();
+                case COLOR -> color = a.getValue();
+                case ALIGNMENT -> align = a.getValue();
+                case SOURCE -> src = a.getValue();
+                case PARENT -> parent = a.getValue();
+                case HEIGHT -> heightS = a.getValue();
+                case WIDTH -> widthS = a.getValue();
+                case COMP_TAGS -> tagsS = a.getValue();
+            }
+        }
+        Alignment alignment = null;
+        if (!align.isEmpty()) {
+            switch (align) {
+                case "IZQUIERDA" -> alignment = Alignment.LEFT;
+                case "DERECHA" -> alignment = Alignment.RIGHT;
+                case "CENTRAR" -> alignment = Alignment.CENTER;
+                case "JUSTIFICAR" -> alignment = Alignment.JUSTIFIED;
+            }
+        }
+        int height = 0, width = 0;
+        if (!heightS.isEmpty() || !widthS.isEmpty()) {
+            try {
+                height = Integer.parseInt(heightS);
+                width = Integer.parseInt(widthS);
+            } catch (NumberFormatException e){
+                throw  new RuntimeException("Wrong value for dimension:"+e.getMessage());
+            }
+        }
+        List<String> tags = new ArrayList<>();
+        if (!tagsS.isEmpty()) tags = List.of(tagsS.split("\\|"));
+        return Component.builder()
+                .id(id)
+                .type(type)
+                .text(text)
+                .alignment(alignment)
+                .color(color)
+                .src(src)
+                .height(height)
+                .width(width)
+                .parent(parent)
+                .tags(tags)
+                .build();
+    }
+
+    private int validateGetCompI(List<Component> comps, String id){
+        int i = -1;
+        for (int j = 0; j<comps.size(); j++){
+            if (comps.get(j).getId().equals(id)) { i = j; break;}
+        }
+        if (i == -1) throw new IllegalArgumentException("ID: "+id+" not found within the page");
+        return i;
+    }
 
     private void validateADD_MODIFY(Action action) throws IllegalArgumentException {
         int pages = 0;
@@ -52,6 +156,7 @@ public class CompController {
         if ( classes == 0 ) throw new IllegalArgumentException("Action missing the parameter: 'CLASS'");
         if (pages > 1 ) throw new IllegalArgumentException("Action cannot have multiple 'PAGE' parameters");
         if (classes > 1 ) throw new IllegalArgumentException("Action cannot have multiple 'CLASS' parameters");
+        if (action.getTags() != null) throw new IllegalArgumentException("'TAGS' not needed in the action");
         if (action.getAttributes() == null) throw new IllegalArgumentException("Action missing attributes");
         switch (className){
             case "TITULO", "PARRAFO" -> validateTITLE_PARRAGRAPH(action.getAttributes());
@@ -108,7 +213,11 @@ public class CompController {
                 case SOURCE -> src++;
                 case HEIGHT -> height++;
                 case WIDTH -> width++;
-                case ALIGNMENT -> align++;
+                case ALIGNMENT -> { align++;
+                    if ( !( a.getValue().equals("CENTRAR") || a.getValue().equals("IZQUIERDA") ||
+                            a.getValue().equals("DERECHA") || a.getValue().equals("JUSTIFICAR"))
+                    ) throw new IllegalArgumentException("Invalid value for 'ALIGNMENT' attribute");
+                }
                 default -> throw new IllegalArgumentException("Attribute '" + a.getType().name() + "' not needed in the action");
             }
         }
@@ -140,6 +249,10 @@ public class CompController {
         }
         if (pages == 0 ) throw new IllegalArgumentException("Action missing the parameter: 'PAGE'");
         if (pages > 1 ) throw new IllegalArgumentException("Action cannot have multiple 'PAGE' parameters");
+        SiteController.validateNoTagsAndAttrs(action);
     }
 
+    public CompController(FilesController files) {
+        this.files = files;
+    }
 }

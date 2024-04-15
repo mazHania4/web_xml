@@ -14,6 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Component implements Externalizable {
+    private String id;
     private ComponentType type;
     private String text;
     private Alignment alignment;

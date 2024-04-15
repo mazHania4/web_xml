@@ -1,0 +1,68 @@
+<acciones>
+    <accion nombre="NUEVO_SITIO_WEB">
+        <parametros>
+            <parametro nombre="ID">
+                [first_site]
+            </parametro>
+        </parametros>
+    </accion>
+    <accion nombre="NUEVO_SITIO_WEB">
+        <parametros>
+            <parametro nombre="ID">
+                [second_site]
+            </parametro>
+            <parametro nombre="USUARIO_CREACION">
+                [user2]
+            </parametro>
+            <parametro nombre="USUARIO_MODIFICACION">
+                [user3]
+            </parametro>
+            <parametro nombre="FECHA_CREACION">
+                [2023-02-15]
+            </parametro>
+            <parametro nombre="FECHA_MODIFICACION">
+                [2024-01-12]
+            </parametro>
+        </parametros>
+    </accion>
+    <accion nombre="NUEVA_PAGINA">
+        <parametros>
+            <parametro nombre="ID">
+                [pag1]
+            </parametro>
+            <parametro nombre="SITIO">
+                [second_site]
+            </parametro>
+            <parametro nombre="PADRE">
+                [index]
+            </parametro>
+        </parametros>
+        <etiquetas>
+            <etiqueta valor="etiqueta1"/>
+            <etiqueta valor="etiqueta2"/>
+        </etiquetas>
+    </accion>
+
+    <accion nombre="AGREGAR_COMPONENTE">
+        <parametros>
+            <parametro nombre="ID">
+                [comp_1]
+            </parametro>
+            <parametro nombre="PAGINA">
+                [pag1]
+            </parametro>
+            <parametro nombre="CLASE">
+                [TITULO]
+            </parametro>
+        </parametros>
+        <atributos>
+            <atributo nombre="TEXTO">
+                [Este es el texto que aparece en el titulo :) ]
+            </atributo>
+            <atributo nombre="COLOR">
+                [#5A5A5A]
+            </atributo>
+        </atributos>
+    </accion>
+</acciones>
+

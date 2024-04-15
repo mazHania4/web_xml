@@ -12,7 +12,7 @@ import java_cup.runtime.*;
 
 whitespace = [ \t]+
 newline = [\n\r]+
-quoteValue = \"[^\n\r]*\"
+quotedValue = \"[^\n\r\"]*[\w]*\"
 bracketValue = "["[^\[\n\r]*"]"
 
 %{
@@ -31,35 +31,6 @@ bracketValue = "["[^\[\n\r]*"]"
 %eofval}
 
 %%
-
-    // NOMBRES DE ACCIONES
-    "\"NUEVO_SITIO_WEB\"" { return symbol(ActionsParserSym.NEW_SITE); }
-    "\"BORRAR_SITIO_WEB\"" { return symbol(ActionsParserSym.DELETE_SITE); }
-    "\"NUEVA_PAGINA\"" { return symbol(ActionsParserSym.NEW_PAGE); }
-    "\"MODIFICAR_PAGINA\"" { return symbol(ActionsParserSym.MODIFY_PAGE); }
-    "\"BORRAR_PAGINA\"" { return symbol(ActionsParserSym.DELETE_PAGE); }
-    "\"AGREGAR_COMPONENTE\"" { return symbol(ActionsParserSym.ADD_COMPONENT); }
-    "\"BORRAR_COMPONENTE\"" { return symbol(ActionsParserSym.DELETE_COMPONENT); }
-    "\"MODIFICAR_COMPONENTE\"" { return symbol(ActionsParserSym.MODIFY_COMPONENT);  }
-     // NOMBRES DE PARAMETROS
-    "\"ID\"" { return symbol(ActionsParserSym.ID); }
-    "\"USUARIO_CREACION\"" { return symbol(ActionsParserSym.CREATION_USER); }
-    "\"FECHA_CREACION\"" { return symbol(ActionsParserSym.CREATION_DATE); }
-    "\"FECHA_MODIFICACION\"" { return symbol(ActionsParserSym.MODIFICATION_DATE); }
-    "\"USUARIO_MODIFICACION\"" { return symbol(ActionsParserSym.MODIFICATION_USER); }
-    "\"TITULO\"" { return symbol(ActionsParserSym.PARAM_TITLE); }
-    "\"SITIO\"" { return symbol(ActionsParserSym.SITE); }
-    "\"PADRE\"" { return symbol(ActionsParserSym.PARENT); } // tambien puede ser nombre de atributo
-    "\"PAGINA\"" { return symbol(ActionsParserSym.PARAM_PAGE); }
-    "\"CLASE\"" { return symbol(ActionsParserSym.CLASS); }
-     // NOMBRES DE ATRIBUTOS COMPONENTES
-    "\"TEXTO\"" { return symbol(ActionsParserSym.TEXT); }
-    "\"ALINEACION\"" { return symbol(ActionsParserSym.ALIGNMENT); }
-    "\"COLOR\"" { return symbol(ActionsParserSym.COLOR); }
-    "\"ORIGEN\"" { return symbol(ActionsParserSym.SOURCE); }
-    "\"ALTURA\"" { return symbol(ActionsParserSym.HEIGHT); }
-    "\"ANCHO\"" { return symbol(ActionsParserSym.WIDTH); }
-    "\"ETIQUETAS\"" { return symbol(ActionsParserSym.COMP_TAGS); }
 
     // NOMBRES DE ETIQUETAS XML
     "<acciones>" { return symbol(ActionsParserSym.ACTIONS_OP); }
@@ -81,8 +52,45 @@ bracketValue = "["[^\[\n\r]*"]"
     "<" { return symbol(ActionsParserSym.LESS_THAN); }
     "/" { return symbol(ActionsParserSym.SLASH); }
     ">" { return symbol(ActionsParserSym.MORE_THAN); }
-    {quoteValue} { return symbol(ActionsParserSym.QUOTE_VALUE, yytext()); }
-    {bracketValue} { return symbol(ActionsParserSym.BRACKET_VALUE, yytext()); }
+    {quotedValue} {
+        String val = yytext();
+        val = yytext().substring(1, val.length()-1);
+        switch (val){
+            // NOMBRES DE ACCIONES
+            case "NUEVO_SITIO_WEB": return symbol(ActionsParserSym.NEW_SITE);
+            case "BORRAR_SITIO_WEB": return symbol(ActionsParserSym.DELETE_SITE);
+            case "NUEVA_PAGINA": return symbol(ActionsParserSym.NEW_PAGE);
+            case "MODIFICAR_PAGINA": return symbol(ActionsParserSym.MODIFY_PAGE);
+            case "BORRAR_PAGINA": return symbol(ActionsParserSym.DELETE_PAGE);
+            case "AGREGAR_COMPONENTE": return symbol(ActionsParserSym.ADD_COMPONENT);
+            case "BORRAR_COMPONENT": return symbol(ActionsParserSym.DELETE_COMPONENT);
+            case "MODIFICAR_COMPONENTE":  return symbol(ActionsParserSym.MODIFY_COMPONENT);
+            // NOMBRES DE PARAMETROS
+            case "ID": return symbol(ActionsParserSym.ID);
+            case "USUARIO_CREACION": return symbol(ActionsParserSym.CREATION_USER);
+            case "FECHA_CREACION": return symbol(ActionsParserSym.CREATION_DATE);
+            case "FECHA_MODIFICACION": return symbol(ActionsParserSym.MODIFICATION_DATE);
+            case "USUARIO_MODIFICACION": return symbol(ActionsParserSym.MODIFICATION_USER);
+            case "TITULO": return symbol(ActionsParserSym.PARAM_TITLE);
+            case "SITIO": return symbol(ActionsParserSym.SITE);
+            case "PADRE": return symbol(ActionsParserSym.PARENT); // tambien puede ser nombre de atributo
+            case "PAGINA": return symbol(ActionsParserSym.PARAM_PAGE);
+            case "CLASE": return symbol(ActionsParserSym.CLASS);
+            // NOMBRES DE ATRIBUTOS COMPONENTES
+            case "TEXTO": return symbol(ActionsParserSym.TEXT);
+            case "ALINEACION": return symbol(ActionsParserSym.ALIGNMENT);
+            case "COLOR": return symbol(ActionsParserSym.COLOR);
+            case "ORIGEN": return symbol(ActionsParserSym.SOURCE);
+            case "ALTURA": return symbol(ActionsParserSym.HEIGHT);
+            case "ANCHO": return symbol(ActionsParserSym.WIDTH);
+            case "ETIQUETAS": return symbol(ActionsParserSym.COMP_TAGS);
+            default: return symbol(ActionsParserSym.QUOTE_VALUE, val);
+        }
+    }
+    {bracketValue} {
+          String val = yytext();
+          val = val.substring(1, val.length()-1);
+          return symbol(ActionsParserSym.BRACKET_VALUE, val); }
     {whitespace} { }
     {newline} { }
     [^] { throw new Error("Illegal string: '"+ yytext() + "' at line: " + yyline+1 + ", col:" + yycolumn+1); }
