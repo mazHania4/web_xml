@@ -81,7 +81,7 @@ public class CompController {
             case "VIDEO" -> type = ComponentType.VIDEO;
             case "MENU" -> type = ComponentType.MENU;
         }
-        String text = "-", color = " ", align = "", src = "-", parent = "-", heightS = "", widthS = "", tagsS = "";
+        String text = "-", color = "#000000", align = "", src = "-", parent = "-", heightS = "", widthS = "", tagsS = "";
         for (Attr a: action.getAttributes() ) {
             switch (a.getType()){
                 case TEXT -> text = a.getValue();
@@ -100,7 +100,7 @@ public class CompController {
                 case "IZQUIERDA" -> alignment = Alignment.LEFT;
                 case "DERECHA" -> alignment = Alignment.RIGHT;
                 case "CENTRAR" -> alignment = Alignment.CENTER;
-                case "JUSTIFICAR" -> alignment = Alignment.JUSTIFIED;
+                case "JUSTIFICAR" -> alignment = Alignment.JUSTIFY;
             }
         }
         int height = 0, width = 0;
@@ -109,11 +109,12 @@ public class CompController {
                 height = Integer.parseInt(heightS);
                 width = Integer.parseInt(widthS);
             } catch (NumberFormatException e){
-                throw  new RuntimeException("Wrong value for dimension:"+e.getMessage());
+                throw new RuntimeException("Wrong value for dimension:"+e.getMessage());
             }
         }
         List<String> tags = new ArrayList<>();
         if (!tagsS.isEmpty()) tags = List.of(tagsS.split("\\|"));
+        if (!color.matches("#([0-9a-fA-F]{6})")) throw new RuntimeException("Wrong value for color: '"+color + "' must be a hex value");
         return Component.builder()
                 .id(id)
                 .type(type)
@@ -143,7 +144,10 @@ public class CompController {
         String className = "";
         for (Param p: action.getParams() ) {
             switch (p.getType()){
-                case PARAM_PAGE -> pages++;
+                case PARAM_PAGE -> {
+                    pages++;
+                    ActionsController.validateReplaceId(p);
+                }
                 case CLASS ->  {
                     classes++;
                     className = p.getValue();
@@ -171,7 +175,12 @@ public class CompController {
         int parents = 0, tags = 0;
         for (Attr a: attrs ) {
             switch (a.getType()){
-                case PARENT -> parents++;
+                case PARENT -> {
+                    parents++;
+                    if (!a.getValue().matches("[_\\-$][a-zA-Z0-9_\\-$]+")) throw new RuntimeException("Wrong value for id: '"+a.getValue()+"' ");;
+                    a.setValue(a.getValue().replace('$', 'S').replace('_', 'Z').replace('-', 'H'));
+
+                }
                 case COMP_TAGS -> tags++;
                 default -> throw new IllegalArgumentException("Attribute '" + a.getType().name() + "' not needed in the action");
             }
@@ -244,7 +253,10 @@ public class CompController {
     private void validateDELETE(Action action) throws IllegalArgumentException {
         int pages = 0;
         for (Param p: action.getParams() ) {
-            if (p.getType().equals(ParamType.PARAM_PAGE)) pages++;
+            if (p.getType().equals(ParamType.PARAM_PAGE)) {
+                pages++;
+                ActionsController.validateReplaceId(p);
+            }
             if (!p.getType().equals(ParamType.PARAM_PAGE) && !p.getType().equals(ParamType.ID)) throw new IllegalArgumentException("Parameter '" + p.getType().name() + "' not needed in the action");
         }
         if (pages == 0 ) throw new IllegalArgumentException("Action missing the parameter: 'PAGE'");

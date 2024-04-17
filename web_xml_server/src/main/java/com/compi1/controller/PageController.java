@@ -94,8 +94,14 @@ public class PageController {
         for (Param p: action.getParams() ) {
             switch (p.getType()){
                 case ID -> {}
-                case SITE -> sites++;
-                case PARENT -> parent++;
+                case SITE -> {
+                    sites++;
+                    ActionsController.validateReplaceId(p);
+                }
+                case PARENT -> {
+                    parent++;
+                    if (!p.getValue().equals("index")) ActionsController.validateReplaceId(p);
+                }
                 case MODIFICATION_DATE -> mod_date++;
                 case MODIFICATION_USER -> mod_us++;
                 case CREATION_DATE -> cr_date++;

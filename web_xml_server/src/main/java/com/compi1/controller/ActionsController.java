@@ -4,8 +4,6 @@ import com.compi1.model.actions.Action;
 import com.compi1.model.actions.Param;
 import com.compi1.model.actions.ParamType;
 
-import java.io.*;
-
 public class ActionsController {
 
     private final SiteController sites;
@@ -32,23 +30,21 @@ public class ActionsController {
         //verify id regex, id can't be 'site' or other files names saved in folder of a site
         int ids = 0;
         for (Param p: action.getParams() ) {
-            if (p.getType().equals(ParamType.ID)) ids++;
+            if (p.getType().equals(ParamType.ID)) {
+                ids++;
+                validateReplaceId(p);
+            }
         }
         if (ids == 0 ) throw new IllegalArgumentException("Action missing the parameter: 'ID'");
         if (ids > 1 ) throw new IllegalArgumentException("Action cannot have multiple 'ID' parameters");
     }
 
-    public ActionsController() {
-        FilesController files;
-        try {
-            FileInputStream fileInputStream = new FileInputStream(FilesController.rootFolder+"ids.ser");
-            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
-            files = (FilesController) objectInputStream.readObject();
-            objectInputStream.close();
-        } catch (IOException | ClassNotFoundException e) {
-            System.out.println(" - Couldn't retrieve saved list of Ids, generating new empty lists - ");
-            files = new FilesController();
-        }
+    public static void validateReplaceId(Param p){
+        if (!p.getValue().matches("[_\\-$][a-zA-Z0-9_\\-$]+")) throw new RuntimeException("Wrong value for id: '"+p.getValue()+"' ");;
+        p.setValue(p.getValue().replace('$', 'S').replace('_', 'Z').replace('-', 'H'));
+    }
+
+    public ActionsController(FilesController files) {
         sites = new SiteController(files);
         pages = new PageController(files);
         comps = new CompController(files);

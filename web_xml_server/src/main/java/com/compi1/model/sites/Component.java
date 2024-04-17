@@ -27,6 +27,7 @@ public class Component implements Externalizable {
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeUTF(id);
         out.writeObject(type);
         out.writeUTF(text);
         out.writeObject(alignment);
@@ -44,6 +45,7 @@ public class Component implements Externalizable {
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         tags = new ArrayList<>();
+        id = in.readUTF();
         type = (ComponentType) in.readObject();
         text = in.readUTF();
         alignment = (Alignment) in.readObject();

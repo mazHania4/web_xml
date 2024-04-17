@@ -1,5 +1,7 @@
 package com.compi1;
 import com.compi1.controller.ActionsController;
+import com.compi1.controller.FilesController;
+import com.compi1.controller.ServerController;
 import com.compi1.model.actions.Action;
 import com.compi1.parsers.*;
 
@@ -11,7 +13,17 @@ public class Main {
 
 
     public static void main(String[] args) throws IOException {
-        ActionsController actionsCtr = new ActionsController();
+        FilesController files;
+        try {
+            FileInputStream fileInputStream = new FileInputStream(FilesController.rootFolder+"ids.ser");
+            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+            files = (FilesController) objectInputStream.readObject();
+            objectInputStream.close();
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println(" - Couldn't retrieve saved list of Ids, generating new empty lists - ");
+            files = new FilesController();
+        }
+        ActionsController actionsCtr = new ActionsController(files);
         try (FileReader fr = new FileReader("/home/hania/Desktop/compi1/web_xml/web_xml_server/src/main/resources/actionsTest.xml")) {
             BufferedReader br = new BufferedReader(fr);
             String xml = br.lines().collect(Collectors.joining("\n"));
@@ -24,6 +36,7 @@ public class Main {
         } catch(Exception e){
             e.printStackTrace();
         }
+        new ServerController(files).start();
         System.out.println("Bye!");
     }
 }

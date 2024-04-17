@@ -2,14 +2,14 @@
     <accion nombre="NUEVO_SITIO_WEB">
         <parametros>
             <parametro nombre="ID">
-                [first_site]
+                [$empty_site]
             </parametro>
         </parametros>
     </accion>
     <accion nombre="NUEVO_SITIO_WEB">
         <parametros>
             <parametro nombre="ID">
-                [second_site]
+                [$main_site]
             </parametro>
             <parametro nombre="USUARIO_CREACION">
                 [user2]
@@ -28,10 +28,10 @@
     <accion nombre="NUEVA_PAGINA">
         <parametros>
             <parametro nombre="ID">
-                [pag1]
+                [$pag01]
             </parametro>
             <parametro nombre="SITIO">
-                [second_site]
+                [$main_site]
             </parametro>
             <parametro nombre="PADRE">
                 [index]
@@ -46,10 +46,10 @@
     <accion nombre="AGREGAR_COMPONENTE">
         <parametros>
             <parametro nombre="ID">
-                [comp_1]
+                [_titulo_simple]
             </parametro>
             <parametro nombre="PAGINA">
-                [pag1]
+                [$pag01]
             </parametro>
             <parametro nombre="CLASE">
                 [TITULO]
@@ -57,10 +57,84 @@
         </parametros>
         <atributos>
             <atributo nombre="TEXTO">
-                [Este es el texto que aparece en el titulo :) ]
+                [Página de tortuguitas :) ]
+            </atributo>
+        </atributos>
+    </accion>
+    <accion nombre="AGREGAR_COMPONENTE">
+        <parametros>
+            <parametro nombre="ID">
+                [_parrafo_verdecito]
+            </parametro>
+            <parametro nombre="PAGINA">
+                [$pag01]
+            </parametro>
+            <parametro nombre="CLASE">
+                [PARRAFO]
+            </parametro>
+        </parametros>
+        <atributos>
+            <atributo nombre="TEXTO">
+                [Los testudínidos son una familia de tortugas terrestres herbívoras.
+                Podemos encontrar tortugas de esta familia en todos los continentes excepto en Oceanía y en la Antártida.
+                Algunas de sus especies alcanzan tamaños gigantescos, como la tortuga gigante de Aldabra o la tortuga de las Galápagos.]
+            </atributo>
+            <atributo nombre="ALINEACION">
+                [DERECHA]
             </atributo>
             <atributo nombre="COLOR">
-                [#5A5A5A]
+                [#3da46d]
+            </atributo>
+        </atributos>
+    </accion>
+    <accion nombre="AGREGAR_COMPONENTE">
+        <parametros>
+            <parametro nombre="ID">
+                [_little_turtle]
+            </parametro>
+            <parametro nombre="PAGINA">
+                [$pag01]
+            </parametro>
+            <parametro nombre="CLASE">
+                [IMAGEN]
+            </parametro>
+        </parametros>
+        <atributos>
+            <atributo nombre="ORIGEN">
+                [https://www.hogarmania.com/archivos/201705/mascotas-tortugas-agua-1280x720x80xX.jpg]
+            </atributo>
+            <atributo nombre="ALINEACION">
+                [CENTRAR]
+            </atributo>
+            <atributo nombre="ALTURA">
+                [200]
+            </atributo>
+            <atributo nombre="ANCHO">
+                [400]
+            </atributo>
+        </atributos>
+    </accion>
+    <accion nombre="AGREGAR_COMPONENTE">
+        <parametros>
+            <parametro nombre="ID">
+                [_VID]
+            </parametro>
+            <parametro nombre="PAGINA">
+                [$pag01]
+            </parametro>
+            <parametro nombre="CLASE">
+                [VIDEO]
+            </parametro>
+        </parametros>
+        <atributos>
+            <atributo nombre="ORIGEN">
+                [http://media.w3.org/2010/05/sintel/trailer.mp4]
+            </atributo>
+            <atributo nombre="ALTURA">
+                [200]
+            </atributo>
+            <atributo nombre="ANCHO">
+                [500]
             </atributo>
         </atributos>
     </accion>

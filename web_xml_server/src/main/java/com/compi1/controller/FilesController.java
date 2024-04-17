@@ -14,13 +14,14 @@ public class FilesController implements Externalizable {
 
     private List<String> siteIds;
     private Map<String, String> page_siteIds;
-    static final String rootFolder = "/home/hania/Desktop/web_xml_sites/";
+    private Map<String, List<String>> pages_tags;
+    public static final String rootFolder = "/home/hania/Desktop/web_xml_sites/";
 
     public void addPage(Page page, String siteId) throws RuntimeException {
         try {
             writeSerialized(page, siteId+"/"+page.getId());
         } catch (IOException e) {
-            throw new RuntimeException("Couldn't externalize page '"+page.getId()+"'");
+            throw new RuntimeException("Couldn't externalize page '"+page.getId()+"' "+e.getMessage());
         }
         //update site's map of visits
         Site site = getSite(siteId);
@@ -30,6 +31,7 @@ public class FilesController implements Externalizable {
         Page parent = getPage(page.getParentId());
         parent.getSubPageIds().add(page.getId());
         page_siteIds.put(page.getId(), siteId);
+        pages_tags.put(page.getId(), page.getTags());
         rewritePage(parent);
         saveIds();
     }
@@ -55,12 +57,13 @@ public class FilesController implements Externalizable {
     }
 
     public void deletePage(String id) throws RuntimeException {
-        List<String> subPages = getPage(id).getSubPageIds();
-        subPages.add(id);
-        for (String sp:subPages) {
-            File file = new File(rootFolder + page_siteIds.get(sp) + "/" + sp + ".ser");
-            if (!file.delete()) throw new RuntimeException("Failed to delete the page '"+sp+"'");
-            page_siteIds.remove(sp);
+        List<String> pages = getPage(id).getSubPageIds();
+        pages.add(id);
+        for (String p:pages) {
+            File file = new File(rootFolder + page_siteIds.get(p) + "/" + p + ".ser");
+            if (!file.delete()) throw new RuntimeException("Failed to delete the page '"+p+"'");
+            page_siteIds.remove(p);
+            pages_tags.remove(p);
         }
         saveIds();
     }
@@ -69,7 +72,10 @@ public class FilesController implements Externalizable {
         try {
             FileUtils.deleteDirectory(new File(rootFolder + id));
             siteIds.remove(id);
+            List<String> pages = new ArrayList<>();
+            page_siteIds.forEach((key, value) -> { if(value.equals(id)) pages.add(key); } );
             page_siteIds.entrySet().removeIf(entry -> id.equals(entry.getValue()));
+            pages.forEach(p -> pages_tags.remove(p));
         } catch (IOException | IllegalArgumentException e) {
             throw new RuntimeException("Couldn't delete site '"+id+"'");
         }
@@ -79,13 +85,14 @@ public class FilesController implements Externalizable {
     public void rewritePage(Page page) throws RuntimeException {
         try {
             String siteId = page_siteIds.get(page.getId());
+            pages_tags.put(page.getId(), page.getTags());
             writeSerialized(page, siteId+"/"+page.getId());
         } catch (IOException e) {
             throw new RuntimeException("Couldn't re-externalize page '"+page.getId()+"'");
         }
     }
 
-    public void rewriteSite(Site site) throws RuntimeException {
+    private void rewriteSite(Site site) throws RuntimeException {
         try {
             writeSerialized(site, site.getId()+"/site");
         } catch (IOException e) {
@@ -108,6 +115,24 @@ public class FilesController implements Externalizable {
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException("Couldn't retrieve page '"+id+"'");
         }
+    }
+
+    public List<String> getPageIdsWithTag(String tag) {
+        List<String> pages = new ArrayList<>();
+        pages_tags.forEach((key, value) -> { if(value.contains(tag)) pages.add(key); } );
+        return pages;
+    }
+
+    private void getSubPagesR(String parent, List<String> list) {
+        for (String page: getPage(parent).getSubPageIds()) {
+            list.add(page);
+            getSubPagesR(page, list);
+        }
+    }
+    public List<String> getSubPages(String parent){
+        List<String> list = new ArrayList<>();
+        getSubPagesR(parent, list);
+        return list;
     }
 
     private Object readSerialized(String nameFromRF) throws IOException, ClassNotFoundException {
@@ -139,6 +164,7 @@ public class FilesController implements Externalizable {
             out.writeUTF(i);
         }
         out.writeObject(page_siteIds);
+        out.writeObject(pages_tags);
     }
 
     @Override
@@ -150,6 +176,7 @@ public class FilesController implements Externalizable {
         }
         //pageIds = new ArrayList<>();
         page_siteIds = (Map<String, String>) in.readObject();
+        pages_tags = (Map<String, List<String>>) in.readObject();
     }
 
     private void saveIds(){
@@ -164,5 +191,6 @@ public class FilesController implements Externalizable {
     public FilesController() {
         siteIds = new ArrayList<>();
         page_siteIds = new HashMap<>();
+        pages_tags = new HashMap<>();
     }
 }

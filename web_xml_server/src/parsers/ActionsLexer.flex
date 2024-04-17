@@ -13,7 +13,7 @@ import java_cup.runtime.*;
 whitespace = [ \t]+
 newline = [\n\r]+
 quotedValue = \"[^\n\r\"]*[\w]*\"
-bracketValue = "["[^\[\n\r]*"]"
+bracketValue = "["[^\[]*"]"
 
 %{
     StringBuffer stringBuffer = new StringBuffer();

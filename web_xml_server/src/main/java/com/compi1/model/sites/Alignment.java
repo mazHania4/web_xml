@@ -1,5 +1,5 @@
 package com.compi1.model.sites;
 
 public enum Alignment {
-    CENTER, LEFT, RIGHT, JUSTIFIED;
+    CENTER, LEFT, RIGHT, JUSTIFY;
 }
