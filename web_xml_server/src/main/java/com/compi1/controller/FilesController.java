@@ -118,6 +118,7 @@ public class FilesController implements Externalizable {
     }
 
     public List<String> getPageIdsWithTag(String tag) {
+        //falta verificar que sean del mismo sitio dado
         List<String> pages = new ArrayList<>();
         pages_tags.forEach((key, value) -> { if(value.contains(tag)) pages.add(key); } );
         return pages;
