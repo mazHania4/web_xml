@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 public class Main {
 
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         FilesController files;
         try {
             FileInputStream fileInputStream = new FileInputStream(FilesController.rootFolder+"ids.ser");
@@ -23,6 +23,12 @@ public class Main {
             System.out.println(" - Couldn't retrieve saved list of Ids, generating new empty lists - ");
             files = new FilesController();
         }
+        //tryTestXML(files);
+        new ServerController(files).start();
+        System.out.println("Bye!");
+    }
+
+    private static void tryTestXML(FilesController files){
         ActionsController actionsCtr = new ActionsController(files);
         try (FileReader fr = new FileReader("/home/hania/Desktop/compi1/web_xml/web_xml_server/src/main/resources/actionsTest.xml")) {
             BufferedReader br = new BufferedReader(fr);
@@ -36,7 +42,5 @@ public class Main {
         } catch(Exception e){
             e.printStackTrace();
         }
-        new ServerController(files).start();
-        System.out.println("Bye!");
     }
 }

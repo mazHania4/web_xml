@@ -27,23 +27,29 @@ public class ServerController {
         return readActionsResponse(makeRequest("actions", actions));
     }
 
-    private String makeRequest(String url, String msg) {
+    private String makeRequest(String url, String content) {
         StringBuilder resp = new StringBuilder();
         try {
             startConnection();
-            String header = "POST /"+url+"/"+ msg +" HTTP/1.1 \n\rHost:localhost\n\r";
-            byte[] byteHeader = header.getBytes(StandardCharsets.ISO_8859_1);
+            String header = "POST /" + url + " HTTP/1.1 \r\n" +
+                    "Host: localhost\r\n" +
+                    "Content-Type: application/xml\r\n" +
+                    "Content-Length: " + content.length() + "\r\n~\r\n" +
+                    content + "\r\n~~\r\n";
+            System.out.println(header);
+            byte[] byteHeader = header.getBytes(StandardCharsets.UTF_8);
             out.write(byteHeader,0,byteHeader.length);
             out.flush();
             byte[] buf = new byte[4096];
             int read;
             while ((read = in.read(buf)) != -1) {
-                resp.append(new String(buf, 0, read, StandardCharsets.ISO_8859_1));
+                resp.append(new String(buf, 0, read, StandardCharsets.UTF_8));
             }
             stopConnection();
         } catch (IOException e) {
             resp = new StringBuilder("(!) Failed to establish connection with server");
         }
+        System.out.println("----\n"+resp+"\n----\n");
         return resp.toString();
     }
 
@@ -60,6 +66,7 @@ public class ServerController {
     }
 
     private String readReportsResponse(String xml){
+        System.out.println("----\n"+xml+"\n----\n");
         try {
             Node node = parseXML(xml);
             if (node.getNodeType() == Node.ELEMENT_NODE) {
@@ -72,7 +79,7 @@ public class ServerController {
             }
             return "Error al interpretar respuesta del servidor";
         } catch (Exception e) {
-            return "Error al interpretar respuesta del servidor";
+            return "Error al interpretar respuesta del servidor" + e.getMessage();
         }
     }
 
@@ -91,7 +98,7 @@ public class ServerController {
             if (node.getNodeType() == Node.ELEMENT_NODE) {
                 Element element = (Element) node;
                 return switch (element.getTagName()) {
-                    case "confirmation" -> ">> Completado: " + element.getTextContent();
+                    case "confirmation" -> ">> Se completaron las acciones:\n" + element.getTextContent();
                     case "error" -> "(!) Error: " + element.getTextContent();
                     default -> "(!) Respuesta del servidor no reconocida";
                 };
