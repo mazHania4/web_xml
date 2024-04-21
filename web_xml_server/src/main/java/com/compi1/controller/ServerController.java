@@ -7,9 +7,7 @@ import com.compi1.parsers.ActionsParser;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ServerController {
 
@@ -26,29 +24,27 @@ public class ServerController {
                 Socket clientSocket = serverSocket.accept();
                 BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                 PrintWriter out = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
-
                 String firstLine = in.readLine();
-                System.out.print("Received request: "+firstLine);
-                StringBuilder request = new StringBuilder();
-                String line;
-                while ((line = in.readLine()) != null) {
-                    if ("~~".equals(line)) break;
-                    request.append(line).append("\n");
-                }
-                String[] parts = request.toString().split("~");
-                if (parts.length == 2) {
-                    String content = parts[1];
+                if (firstLine != null){
+                    System.out.println("Received request: " + firstLine);
                     if (firstLine.startsWith("GET")) {
                         handleGET(firstLine, out);
                     } else if (firstLine.startsWith("POST")) {
-                        handlePOST(content, firstLine, out);
+                        StringBuilder request = new StringBuilder();
+                        String line;
+                        while ((line = in.readLine()) != null) {
+                            if ("~~".equals(line)) break;
+                            request.append(line).append("\n");
+                        }
+                        String[] parts = request.toString().split("~");
+                        if (parts.length == 2) {
+                            String content = parts[1];
+                            handlePOST(content, firstLine, out);
+                        }
                     }
-                } else {
-                    out.println("HTTP/1.1 400 Bad Request");
-                    out.println();
+                    out.flush();
+                    clientSocket.close();
                 }
-                out.flush();
-                clientSocket.close();
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -59,14 +55,16 @@ public class ServerController {
         String url = reqLine.split(" ")[1].replace('$', 'S').replace('_', 'Z').replace('-', 'H');;
         String[] urlParts = url.split("/");
         if (urlParts.length>3){ out.println("HTTP/1.1 400 Bad Request"); return; }
-        String site = urlParts[1];
+        String site;
         String content = "";
-        if (site.isEmpty()) {
+        if (urlParts.length==0) {
             content = htmlCtr.getSiteList();
         } else {
+            site = urlParts[1];
             if (!files.siteIdExists(site)) { out.println("HTTP/1.1 404 NOT_FOUND "); return; }
             try {
-                String page = urlParts.length > 2 ? urlParts[2] : site+"_index";
+                String page = urlParts.length > 2 ? urlParts[2] : site+"Index";
+                if (page.equals("index")) page = site +"Index";
                 if (!files.pageIdExists(page)) { out.println("HTTP/1.1 404 NOT_FOUND "); return; }
                 content = htmlCtr.parsePage(page, site);
             }catch (RuntimeException e){
@@ -91,11 +89,12 @@ public class ServerController {
                         StringBuilder response = new StringBuilder();
                         actionsCtr.execute(a);
                         response.append(a.getType()).append("\n");
-                        System.out.println("response:" + response);
+                        System.out.println("\tresponse:" + response);
                         out.println("<confirmation>"+response+"</confirmation>");
                         out.println();
                     }
-                } catch(Exception e){
+                } catch(Exception | Error e){
+                    System.out.println("\tresponse:" + e.getMessage());
                     out.println("<error>"+e.getMessage()+"</error>");
                     out.println();
                 }

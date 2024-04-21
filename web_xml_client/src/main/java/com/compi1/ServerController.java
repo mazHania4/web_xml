@@ -36,7 +36,6 @@ public class ServerController {
                     "Content-Type: application/xml\r\n" +
                     "Content-Length: " + content.length() + "\r\n~\r\n" +
                     content + "\r\n~~\r\n";
-            System.out.println(header);
             byte[] byteHeader = header.getBytes(StandardCharsets.UTF_8);
             out.write(byteHeader,0,byteHeader.length);
             out.flush();
@@ -49,7 +48,6 @@ public class ServerController {
         } catch (IOException e) {
             resp = new StringBuilder("(!) Failed to establish connection with server");
         }
-        System.out.println("----\n"+resp+"\n----\n");
         return resp.toString();
     }
 
@@ -66,7 +64,6 @@ public class ServerController {
     }
 
     private String readReportsResponse(String xml){
-        System.out.println("----\n"+xml+"\n----\n");
         try {
             Node node = parseXML(xml);
             if (node.getNodeType() == Node.ELEMENT_NODE) {

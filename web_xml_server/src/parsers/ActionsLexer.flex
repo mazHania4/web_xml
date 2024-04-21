@@ -9,6 +9,7 @@ import java_cup.runtime.*;
 %line
 %column
 %char
+%ignorecase
 
 whitespace = [ \t]+
 newline = [\n\r]+
@@ -33,6 +34,11 @@ bracketValue = "["[^\[]*"]"
 %%
 
     // NOMBRES DE ETIQUETAS XML
+
+    {bracketValue} {
+          String val = yytext();
+          val = val.substring(1, val.length()-1);
+          return symbol(ActionsParserSym.BRACKET_VALUE, val); }
     "<acciones>" { return symbol(ActionsParserSym.ACTIONS_OP); }
     "</acciones>" { return symbol(ActionsParserSym.ACTIONS_CL); }
     "accion" { return symbol(ActionsParserSym.ACTION); }
@@ -87,10 +93,6 @@ bracketValue = "["[^\[]*"]"
             default: return symbol(ActionsParserSym.QUOTE_VALUE, val);
         }
     }
-    {bracketValue} {
-          String val = yytext();
-          val = val.substring(1, val.length()-1);
-          return symbol(ActionsParserSym.BRACKET_VALUE, val); }
     {whitespace} { }
     {newline} { }
     [^] { throw new Error("Illegal string: '"+ yytext() + "' at line: " + yyline+1 + ", col:" + yycolumn+1); }

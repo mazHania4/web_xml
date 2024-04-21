@@ -18,7 +18,6 @@ public class CompController {
 
 
     public void executeADD(Action action) throws IllegalArgumentException {
-        System.out.println("\nADD COMP\n");
         validateADD_MODIFY(action);
         String cId = "", pId  = "", classN = "";
         for (Param p: action.getParams() ) {
@@ -38,7 +37,6 @@ public class CompController {
     }
 
     public void executeMODIFY(Action action) throws IllegalArgumentException {
-        System.out.println("\nREPLACE COMP\n");
         validateADD_MODIFY(action);
         String cId = "", pId  = "", classN = "";
         for (Param p: action.getParams() ) {
@@ -57,7 +55,6 @@ public class CompController {
     }
 
     public void executeDELETE(Action action) throws IllegalArgumentException {
-        System.out.println("\nDELETE COMP\n");
         validateDELETE(action);
         String cId = "", pId  = "";
         for (Param p: action.getParams() ) {
@@ -160,8 +157,8 @@ public class CompController {
         if ( classes == 0 ) throw new IllegalArgumentException("Action missing the parameter: 'CLASS'");
         if (pages > 1 ) throw new IllegalArgumentException("Action cannot have multiple 'PAGE' parameters");
         if (classes > 1 ) throw new IllegalArgumentException("Action cannot have multiple 'CLASS' parameters");
-        if (action.getTags() != null) throw new IllegalArgumentException("'TAGS' not needed in the action");
-        if (action.getAttributes() == null) throw new IllegalArgumentException("Action missing attributes");
+        if (!action.getTags().isEmpty()) throw new IllegalArgumentException("'TAGS' not needed in the action");
+        if (action.getAttributes().isEmpty()) throw new IllegalArgumentException("Action missing attributes");
         switch (className){
             case "TITULO", "PARRAFO" -> validateTITLE_PARRAGRAPH(action.getAttributes());
             case "IMAGEN"-> validateIMG(action.getAttributes());

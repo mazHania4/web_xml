@@ -4,6 +4,7 @@ import com.compi1.model.sites.Page;
 import com.compi1.model.sites.Site;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import org.apache.commons.io.FileUtils;
 
 import java.io.*;
@@ -12,7 +13,7 @@ import java.util.*;
 @Builder @AllArgsConstructor
 public class FilesController implements Externalizable {
 
-    private List<String> siteIds;
+    @Getter private List<String> siteIds;
     private Map<String, String> page_siteIds;
     private Map<String, List<String>> pages_tags;
     public static final String rootFolder = "/home/hania/Desktop/web_xml_sites/";
@@ -57,7 +58,8 @@ public class FilesController implements Externalizable {
     }
 
     public void deletePage(String id) throws RuntimeException {
-        List<String> pages = getPage(id).getSubPageIds();
+        Page page = getPage(id);
+        List<String> pages = page.getSubPageIds();
         pages.add(id);
         for (String p:pages) {
             File file = new File(rootFolder + page_siteIds.get(p) + "/" + p + ".ser");
@@ -65,6 +67,10 @@ public class FilesController implements Externalizable {
             page_siteIds.remove(p);
             pages_tags.remove(p);
         }
+        //update parent_page's list of subpages
+        Page parent = getPage(page.getParentId());
+        parent.getSubPageIds().remove(id);
+        rewritePage(parent);
         saveIds();
     }
 
@@ -126,6 +132,7 @@ public class FilesController implements Externalizable {
 
     private void getSubPagesR(String parent, List<String> list) {
         for (String page: getPage(parent).getSubPageIds()) {
+            System.out.println("asd"+parent+"-"+page);
             list.add(page);
             getSubPagesR(page, list);
         }

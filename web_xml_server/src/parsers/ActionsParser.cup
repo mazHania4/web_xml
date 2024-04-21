@@ -90,7 +90,7 @@ attributes ::= ATTRIBUTES_OP attribute:a _attributes:a_list ATTRIBUTES_CL
         {:List<Attr> attr_list = (List<Attr>) a_list;
             attr_list.addFirst((Attr)a);
             RESULT = attr_list; :}
-    |  {: RESULT = null; :};
+    |  {: RESULT = new ArrayList(); :};
 _attributes ::= attribute:a _attributes:a_list
         {:List<Attr> attr_list = (List<Attr>) a_list;
             attr_list.addFirst((Attr)a);
@@ -113,7 +113,7 @@ tags ::= TAGS_OP tag:t _tags:t_list TAGS_CL
         {:List<String> tag_list = (List<String>) t_list;
                     tag_list.addFirst((String)t);
                     RESULT = tag_list; :}
-    |  {: RESULT = null; :};
+    |  {: RESULT = new ArrayList(); :};
 _tags ::= tag:t _tags:t_list
         {:List<String> tag_list = (List<String>) t_list;
             tag_list.addFirst((String)t);

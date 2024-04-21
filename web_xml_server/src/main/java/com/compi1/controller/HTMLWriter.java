@@ -3,11 +3,13 @@ package com.compi1.controller;
 import com.compi1.model.sites.Component;
 import com.compi1.model.sites.Page;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class HTMLWriter {
 
     private final FilesController files;
+    private static String url = "http://localhost:2000/";
 
     public String parsePage(String pageId, String siteId) throws RuntimeException {
         Page page = files.getPage(pageId);
@@ -20,12 +22,19 @@ public class HTMLWriter {
                 case PARAGRAPH -> addParagraph(c, body, styles);
                 case IMG -> addIMG(c, body, styles);
                 case VIDEO -> addVideo(c, body, styles);
-                case MENU -> addMenu(c, siteId, body);
+                case MENU -> addMenu(c, siteId, pageId, body);
             }
         }
-        //add parent page
-        //add subpages
-        //add tags??
+        body.append("<h2>Pagina Padre:<h2>\n").append(link(siteId+"/"+page.getParentId(), page.getParentId()));
+        body.append("<h2>Sub-paginas:<h2>\n");
+        for (String p: page.getSubPageIds()) {
+            body.append(link(siteId+"/"+p, p));
+        }
+        body.append("<h2>Tags:<h2>\n <ol>\n");
+        for (String t: page.getTags()) {
+            body.append("<li>").append(t).append("</li>\n");
+        }
+        body.append("<ol>\n");
         return formHtml(body.toString(), styles.toString(), page.getTitle());
     }
 
@@ -66,23 +75,34 @@ public class HTMLWriter {
         styles.append("}\n");
     }
 
-    private void addMenu(Component c, String siteId, StringBuilder body) {
-        List<String> pageIds = c.getTags().isEmpty() ?
-                files.getSubPages(c.getParent()) :
-                c.getTags().stream()
-                        .flatMap(tag -> files.getPageIdsWithTag(tag).stream())
-                        .distinct()
-                        .filter(id -> c.getParent().isEmpty() || files.getSubPages(c.getParent()).contains(id))
-                        .toList();
-        body.append("<div>\n");
+    private void addMenu(Component c, String siteId, String pageId, StringBuilder body) {
+        List<String> pageIds = new ArrayList<>();
+        List<String> subpages = files.getSubPages(pageId);
+        if (c.getTags().isEmpty()) pageIds = subpages;
+        else {
+            for (String tag: c.getTags()) {
+                for (String p : files.getPageIdsWithTag(tag))
+                    if (c.getParent().equals("-") || subpages.contains(p)) pageIds.add(p);
+            }
+        }
+        body.append("<div>\n<h3>Menu:</h3>\n");
         for (String s : pageIds) {
-            body.append("<a href=\"http://localhost:2000/").append(siteId).append("/").append(s).append("\">").append(s).append("</a><br>\n");
+            body.append(link(siteId+"/"+s, s));
         }
         body.append("</div>\n");
     }
 
     public String getSiteList() {
-        return "";
+        StringBuilder body = new StringBuilder();
+        body.append("<h1>Sitios:<h1>\n");
+        for (String s: files.getSiteIds()) {
+            body.append(link(s+"/"+s+"Index", s));
+        }
+        return formHtml(body.toString(), " ", "Sitios");
+    }
+
+    private String link(String route, String name){
+        return "<a href =\""+url+route+"\">"+name+"</a><br>\n";
     }
 
     private String formHtml(String body, String styles, String title){

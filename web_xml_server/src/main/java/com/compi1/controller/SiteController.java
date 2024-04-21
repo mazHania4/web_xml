@@ -15,7 +15,6 @@ public class SiteController {
     private final FilesController files;
 
     public void executeNEW(Action action) throws RuntimeException {
-        System.out.println("\nNEW SITE\n");
         validateNEW(action);
         String id = "", cr_user="", cr_s_date="", mod_user="", mod_s_date="";
         for (Param p: action.getParams() ) {
@@ -40,8 +39,8 @@ public class SiteController {
                 .build();
         Page index = Page.builder()
                 .parentId("-")
-                .id(id+"_index")
-                .title("index")
+                .id(id+"Index")
+                .title("Index")
                 .components(new ArrayList<>())
                 .subPageIds(new ArrayList<>())
                 .tags(new ArrayList<>())
@@ -54,7 +53,6 @@ public class SiteController {
     }
 
     public void executeDELETE(Action action) throws RuntimeException {
-        System.out.println("\nDELETE SITE\n");
         validateNoTagsAndAttrs(action);
         String id = "";
         for (Param p: action.getParams() ) {
@@ -93,8 +91,8 @@ public class SiteController {
         } else return LocalDate.now();
     }
     public static void validateNoTagsAndAttrs(Action action) {
-        if (action.getTags() != null) throw new IllegalArgumentException("'TAGS' not needed in the action");
-        if (action.getAttributes() != null) throw new IllegalArgumentException("'ATTRIBUTES' not needed in the action");
+        if (!action.getTags().isEmpty()) throw new IllegalArgumentException("'TAGS' not needed in the action");
+        if (!action.getAttributes().isEmpty()) throw new IllegalArgumentException("'ATTRIBUTES' not needed in the action");
     }
 
     public SiteController(FilesController files) {

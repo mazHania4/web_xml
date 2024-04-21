@@ -13,7 +13,6 @@ public class PageController {
     private final FilesController files;
 
     public void executeNEW(Action action) throws RuntimeException {
-        System.out.println("\nNEW PAGE\n");
         validateNEW(action);
         String id = "", parentId="", title="", site="", cr_user="", cr_s_date="", mod_user="", mod_s_date="";
         for (Param p: action.getParams() ) {
@@ -29,7 +28,7 @@ public class PageController {
         if (files.pageIdExists(id)) throw new IllegalArgumentException("ID: "+id+" for pages already exists");
         if (cr_user.isEmpty()) cr_user = "-unknown-";
         if (mod_user.isEmpty()) cr_user = "-unknown-";
-        if (parentId.equals("index")) parentId = site + "_index";
+        if (parentId.equals("index")) parentId = site + "Index";
         if (title.isEmpty()) title = "title";
         LocalDate cr_date = SiteController.processDate(cr_s_date);
         LocalDate mod_date = SiteController.processDate(mod_s_date);
@@ -39,7 +38,7 @@ public class PageController {
                 .title(title)
                 .components(new ArrayList<>())
                 .subPageIds(new ArrayList<>())
-                .tags(new ArrayList<>())
+                .tags(action.getTags())
                 .cr_user(cr_user)
                 .cr_date(cr_date)
                 .mod_user(mod_user)
@@ -49,7 +48,6 @@ public class PageController {
     }
 
     public void executeMODIFY(Action action) throws RuntimeException {
-        System.out.println("\nMODIFY PAGE\n");
         validateMODIFY(action);
         String id = "", title = "";
         for (Param p: action.getParams() ) {
@@ -65,7 +63,6 @@ public class PageController {
     }
 
     public void executeDELETE(Action action) throws RuntimeException {
-        System.out.println("\nDELETE SITE\n");
         SiteController.validateNoTagsAndAttrs(action);
         String id = "";
         for (Param p: action.getParams() ) {
@@ -87,7 +84,7 @@ public class PageController {
         }
         if ( title == 0 && action.getTags().isEmpty() ) throw new IllegalArgumentException("Action missing the 'TAGS' or parameter 'TITLE'");
         if ( title > 1 ) throw new IllegalArgumentException("Action cannot have multiple 'TITLE' parameters");
-        if (action.getAttributes() != null) throw new IllegalArgumentException("'ATTRIBUTES' not needed in the action");
+        if (!action.getAttributes().isEmpty()) throw new IllegalArgumentException("'ATTRIBUTES' not needed in the action");
     }
     private void validateNEW(Action action) throws IllegalArgumentException {
         int sites = 0, parent = 0, mod_date = 0, mod_us = 0, cr_us = 0, cr_date = 0, title = 0;
@@ -120,7 +117,7 @@ public class PageController {
         if ( mod_us > 1 ) throw new IllegalArgumentException("Action cannot have multiple 'MODIFICATION_USER' parameters");
         if ( cr_us > 1 ) throw new IllegalArgumentException("Action cannot have multiple 'CREATION_USER' parameters");
         if ( cr_date > 1 ) throw new IllegalArgumentException("Action cannot have multiple 'MODIFICATION_USER' parameters");
-        if (action.getAttributes() != null) throw new IllegalArgumentException("'ATTRIBUTES' not needed in the action");
+        if (!action.getAttributes().isEmpty()) throw new IllegalArgumentException("'ATTRIBUTES' not needed in the action");
     }
 
     public PageController(FilesController files) {
