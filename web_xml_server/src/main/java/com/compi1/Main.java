@@ -6,7 +6,6 @@ import com.compi1.model.actions.Action;
 import com.compi1.parsers.*;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,7 +20,7 @@ public class Main {
             files = (FilesController) objectInputStream.readObject();
             objectInputStream.close();
         } catch (IOException | ClassNotFoundException e) {
-            System.out.println(" - Couldn't retrieve saved list of Ids, generating new empty lists - ");
+            System.out.println(" - Couldn't retrieve saved list of Ids, generating new empty lists - "+e.getMessage());
             files = new FilesController();
         }
         //tryTestXML(files);

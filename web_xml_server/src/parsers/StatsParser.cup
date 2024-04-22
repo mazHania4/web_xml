@@ -40,7 +40,7 @@ pages ::= PAGE_VISITS paths:p {:RESULT = Report.builder().path("").type(ReportTy
 
 popular ::= POPULAR_PAGES PATH:p {:RESULT = Report.builder().path((String)p).type(ReportType.POPULAR_PAGES).paths(new ArrayList()).build();:};
 
-popular ::= COMPONENT comp_types:t PATH:p {:RESULT = Report.builder().path((String)p).type(ReportType.COMPONENT).paths(new ArrayList()).build();:};
+popular ::= COMPONENT comp_types:t PATH:p {:RESULT = Report.builder().compType((ComponentType)t).path((String)p).type(ReportType.COMPONENT).paths(new ArrayList()).build();:};
 
 paths ::= PATH:p _paths:ps {: List<String> paths = (List<String>) ps;
             paths.add((String)p);

@@ -62,6 +62,20 @@ public class FilesController implements Externalizable {
         Map<String, Integer> map = getSite(siteId).getPage_visits();
         return map.get(pageId);
     }
+    public Map<String, Integer> getPopularPages(String siteId){
+        Map<String, Integer> map = getSite(siteId).getPage_visits();
+        Map<String, Integer> pages = new HashMap<>();
+        PriorityQueue<Map.Entry<String, Integer>> pq = new PriorityQueue<>((a, b) -> b.getValue()-a.getValue());
+        for (Map.Entry<String, Integer> entry : map.entrySet()){
+            pq.offer(entry);
+            if (pq.size() > 10) pq.poll();
+        }
+        while (!pq.isEmpty()){
+            Map.Entry<String, Integer> entry = pq.poll();
+            pages.put(entry.getKey(), entry.getValue());
+        }
+        return pages;
+    }
 
     public int getVisits(String siteId){
         return getSite(siteId).getVisits();
