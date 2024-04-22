@@ -1,8 +1,11 @@
 package com.compi1.controller;
 
 import com.compi1.model.actions.Action;
+import com.compi1.model.stats.Report;
 import com.compi1.parsers.ActionsLexer;
 import com.compi1.parsers.ActionsParser;
+import com.compi1.parsers.StatsLexer;
+import com.compi1.parsers.StatsParser;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -43,6 +46,8 @@ public class ServerController {
                         }
                     }
                     out.flush();
+                    out.close();
+                    in.close();
                     clientSocket.close();
                 }
             }
@@ -67,6 +72,7 @@ public class ServerController {
                 if (page.equals("index")) page = site +"Index";
                 if (!files.pageIdExists(page)) { out.println("HTTP/1.1 404 NOT_FOUND "); return; }
                 content = htmlCtr.parsePage(page, site);
+                files.addVisit(site, page);
             }catch (RuntimeException e){
                 out.println("HTTP/1.1 412 PRECONDITION_FAILED");
             }
@@ -100,7 +106,18 @@ public class ServerController {
                 }
             }
             case "reports"->{
-
+                try {
+                    StatsParser parser = new StatsParser(new StatsLexer(new StringReader(content)));
+                    Report report = (Report) parser.parse().value;
+                        String response = new ReportsController(files).of(report);
+                        System.out.println("\tresponse:" + response);
+                        out.println("<report>"+response+"</report>");
+                        out.println();
+                } catch(Exception | Error e){
+                    System.out.println("\tresponse:" + e.getMessage());
+                    out.println("<error>"+e.getMessage()+"</error>");
+                    out.println();
+                }
             }
             default -> out.println("HTTP/1.1 400 Bad Request");
         }

@@ -69,7 +69,7 @@ public class ServerController {
             if (node.getNodeType() == Node.ELEMENT_NODE) {
                 Element element = (Element) node;
                 return switch (element.getTagName()) {
-                    case "report" -> "(*) Reporte: " + element.getTextContent();
+                    case "report" -> "(*) Reporte:\n" + element.getTextContent();
                     case "error" -> "(!) Error: " + element.getTextContent();
                     default -> "(!) Respuesta del servidor no reconocida";
                 };

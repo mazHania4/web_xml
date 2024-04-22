@@ -1,0 +1,57 @@
+package com.compi1.parsers;
+import java_cup.runtime.*;
+import com.compi1.model.stats.*;
+import com.compi1.model.sites.ComponentType;
+import java.util.List;
+import java.util.ArrayList;
+
+class StatsParser;
+
+parser code {:
+    public StatsParser(ActionsLexer lex, ComplexSymbolFactory sf) {
+        super(lex,sf);
+    }
+    public void syntax_error(Symbol cur_token) {
+        throw new Error("Syntax error in token '" +symbl_name_from_id(cur_token.sym) + "':'" + cur_token.value
+        +"' at line: " + cur_token.left + ", col:" + cur_token.right);
+    }
+:};
+
+terminal
+// NOMBRES DE ACCIONES
+CONSULT, SITE_VISITS, PAGE_VISITS, POPULAR_PAGES, COMPONENT, COMMA, SEMICOLON, TITLE, PARAGRAPH, IMG, VID, MENU, PATH;
+
+nonterminal consult, report, sites, pages, popular, components, paths, _paths, comp_types;
+
+start with consult;
+
+consult ::= CONSULT report:r SEMICOLON{:
+            RESULT = r;
+            :};
+
+report ::= sites:r {:RESULT = r;:}
+    | pages:r {:RESULT = r;:}
+    | popular:r {:RESULT = r;:}
+    | components:r {:RESULT = r;:};
+
+sites ::= SITE_VISITS paths:p {:RESULT = Report.builder().path("").type(ReportType.SITE_VISITS).paths((List<String>)p).build();:};
+
+pages ::= PAGE_VISITS paths:p {:RESULT = Report.builder().path("").type(ReportType.PAGE_VISITS).paths((List<String>)p).build();:};
+
+popular ::= POPULAR_PAGES PATH:p {:RESULT = Report.builder().path((String)p).type(ReportType.POPULAR_PAGES).paths(new ArrayList()).build();:};
+
+popular ::= COMPONENT comp_types:t PATH:p {:RESULT = Report.builder().path((String)p).type(ReportType.COMPONENT).paths(new ArrayList()).build();:};
+
+paths ::= PATH:p _paths:ps {: List<String> paths = (List<String>) ps;
+            paths.add((String)p);
+            RESULT = paths;:};
+_paths ::= COMMA PATH:p _paths:ps{: List<String> paths = (List<String>) ps;
+            paths.add((String)p);
+            RESULT = paths;:}
+    | {:RESULT = new ArrayList<>();:};
+
+comp_types ::= TITLE {:RESULT = ComponentType.TITLE;:}
+    | PARAGRAPH {:RESULT = ComponentType.PARAGRAPH;:}
+    | IMG {:RESULT = ComponentType.IMG;:}
+    | VID  {:RESULT = ComponentType.VIDEO;:}
+    | MENU {:RESULT = ComponentType.MENU;:};

@@ -52,9 +52,19 @@ public class FilesController implements Externalizable {
 
     public void addVisit(String siteId, String pageId){
         Site site = getSite(siteId);
+        site.setVisits(site.getVisits()+1);
         Map<String, Integer> map = site.getPage_visits();
         map.replace(pageId, map.get(pageId)+1);
         rewriteSite(site);
+    }
+
+    public int getVisits(String siteId, String pageId){
+        Map<String, Integer> map = getSite(siteId).getPage_visits();
+        return map.get(pageId);
+    }
+
+    public int getVisits(String siteId){
+        return getSite(siteId).getVisits();
     }
 
     public void deletePage(String id) throws RuntimeException {
@@ -110,7 +120,7 @@ public class FilesController implements Externalizable {
         try {
             return (Site) readSerialized(id+"/site");
         } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException("Couldn't retrieve site '"+id+"'");
+            throw new RuntimeException("Couldn't retrieve site '"+id+"'"+e.getMessage());
         }
     }
 
@@ -132,7 +142,6 @@ public class FilesController implements Externalizable {
 
     private void getSubPagesR(String parent, List<String> list) {
         for (String page: getPage(parent).getSubPageIds()) {
-            System.out.println("asd"+parent+"-"+page);
             list.add(page);
             getSubPagesR(page, list);
         }

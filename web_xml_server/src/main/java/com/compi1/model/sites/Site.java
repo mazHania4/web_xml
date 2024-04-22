@@ -16,6 +16,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class Site implements Externalizable {
     private String id;
+    private int visits;
     private String cr_user;
     private LocalDate cr_date;
     private String mod_user;
@@ -25,6 +26,7 @@ public class Site implements Externalizable {
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeUTF(id);
+        out.writeInt(visits);
         out.writeUTF(cr_user);
         out.writeObject(cr_date);
         out.writeUTF(mod_user);
@@ -35,6 +37,7 @@ public class Site implements Externalizable {
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         id = in.readUTF();
+        visits = in.readInt();
         cr_user = in.readUTF();
         cr_date = (LocalDate) in.readObject();
         mod_user = in.readUTF();
