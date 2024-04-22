@@ -21,10 +21,7 @@ public class ReportsController {
                     resp.append(p).append(": ").append(files.getVisits(splits[0], splits[splits.length-1])).append("\n");
                 }
             }
-            case POPULAR_PAGES -> {
-
-            }
-            case COMPONENT -> resp.append("Pendiente de implementar :(");
+            case POPULAR_PAGES, COMPONENT -> resp.append("Pendiente de implementar :(");
         }
         return resp.toString();
     }
