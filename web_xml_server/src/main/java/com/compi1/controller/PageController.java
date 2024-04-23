@@ -93,11 +93,11 @@ public class PageController {
                 case ID -> {}
                 case SITE -> {
                     sites++;
-                    ActionsController.validateReplaceId(p);
+                    ActionsController.validateRegexId(p.getValue());
                 }
                 case PARENT -> {
                     parent++;
-                    if (!p.getValue().equals("index")) ActionsController.validateReplaceId(p);
+                    if (!p.getValue().equals("index")) ActionsController.validateRegexId(p.getValue());
                 }
                 case MODIFICATION_DATE -> mod_date++;
                 case MODIFICATION_USER -> mod_us++;

@@ -43,6 +43,7 @@ quotedValue = \"[^\n\r\"]*[\w]*\"
     "IMAGEN" { return symbol(StatsParserSym.IMG); }
     "VIDEO" { return symbol(StatsParserSym.VID); }
     "MENU" { return symbol(StatsParserSym.MENU); }
+    "TODOS" { return symbol(StatsParserSym.ALL); }
     {quotedValue} {
         String val = yytext();
         val = yytext().substring(1, val.length()-1);

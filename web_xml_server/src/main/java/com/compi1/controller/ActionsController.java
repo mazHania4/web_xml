@@ -11,7 +11,7 @@ public class ActionsController {
     private final CompController comps;
 
     public void execute(Action action) throws IllegalArgumentException {
-        validateHasID(action);
+        validateID(action);
         // each verifies that the necessary parameters/attributes are present
         // and there are no extra parameters/attributes/tags unnecessary
         switch (action.getType()){
@@ -26,22 +26,21 @@ public class ActionsController {
         }
     }
 
-    private void validateHasID(Action action) throws IllegalArgumentException{
+    private void validateID(Action action) throws IllegalArgumentException{
         //verify id regex, id can't be 'site' or other files names saved in folder of a site
         int ids = 0;
         for (Param p: action.getParams() ) {
             if (p.getType().equals(ParamType.ID)) {
                 ids++;
-                validateReplaceId(p);
+                validateRegexId(p.getValue());
             }
         }
         if (ids == 0 ) throw new IllegalArgumentException("Action missing the parameter: 'ID'");
         if (ids > 1 ) throw new IllegalArgumentException("Action cannot have multiple 'ID' parameters");
     }
 
-    public static void validateReplaceId(Param p){
-        if (!p.getValue().matches("[_\\-$][a-zA-Z0-9_\\-$]+")) throw new RuntimeException("Wrong value for id: '"+p.getValue()+"' ");;
-        p.setValue(p.getValue().replace('$', 'S').replace('_', 'Z').replace('-', 'H'));
+    public static void validateRegexId(String p){
+        if (!p.matches("[_\\-$][a-zA-Z0-9_\\-$]+")) throw new RuntimeException("Wrong value for id: '"+p+"' ");
     }
 
     public ActionsController(FilesController files) {

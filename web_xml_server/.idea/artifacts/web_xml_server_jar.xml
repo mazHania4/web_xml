@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="web_xml_server:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/web_xml_server_jar</output-path>
+    <root id="archive" name="web_xml_server.jar">
+      <element id="module-output" name="web_xml_server" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/commons-io/commons-io/2.16.1/commons-io-2.16.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/github/vbmacher/java-cup-runtime/11b-20160615-3/java-cup-runtime-11b-20160615-3.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

@@ -143,13 +143,16 @@ public class CompController {
             switch (p.getType()){
                 case PARAM_PAGE -> {
                     pages++;
-                    ActionsController.validateReplaceId(p);
+                    ActionsController.validateRegexId(p.getValue());
                 }
                 case CLASS ->  {
                     classes++;
                     className = p.getValue();
                 }
-                case ID -> {}
+                case ID -> {
+                    ActionsController.validateRegexId(p.getValue());
+                    p.setValue(replaceId(p.getValue()));
+                }
                 default -> throw new IllegalArgumentException("Parameter '" + p.getType().name() + "' not needed in the action");
             }
         }
@@ -174,9 +177,7 @@ public class CompController {
             switch (a.getType()){
                 case PARENT -> {
                     parents++;
-                    if (!a.getValue().matches("[_\\-$][a-zA-Z0-9_\\-$]+")) throw new RuntimeException("Wrong value for id: '"+a.getValue()+"' ");;
-                    a.setValue(a.getValue().replace('$', 'S').replace('_', 'Z').replace('-', 'H'));
-
+                    ActionsController.validateRegexId(a.getValue());
                 }
                 case COMP_TAGS -> tags++;
                 default -> throw new IllegalArgumentException("Attribute '" + a.getType().name() + "' not needed in the action");
@@ -250,15 +251,25 @@ public class CompController {
     private void validateDELETE(Action action) throws IllegalArgumentException {
         int pages = 0;
         for (Param p: action.getParams() ) {
-            if (p.getType().equals(ParamType.PARAM_PAGE)) {
-                pages++;
-                ActionsController.validateReplaceId(p);
+            switch (p.getType()){
+                case ID -> {
+                    ActionsController.validateRegexId(p.getValue());
+                    p.setValue(replaceId(p.getValue()));
+                }
+                case PARAM_PAGE -> {
+                    pages++;
+                    ActionsController.validateRegexId(p.getValue());
+                }
+                default -> throw new IllegalArgumentException("Parameter '" + p.getType().name() + "' not needed in the action");
             }
-            if (!p.getType().equals(ParamType.PARAM_PAGE) && !p.getType().equals(ParamType.ID)) throw new IllegalArgumentException("Parameter '" + p.getType().name() + "' not needed in the action");
         }
         if (pages == 0 ) throw new IllegalArgumentException("Action missing the parameter: 'PAGE'");
         if (pages > 1 ) throw new IllegalArgumentException("Action cannot have multiple 'PAGE' parameters");
         SiteController.validateNoTagsAndAttrs(action);
+    }
+
+    private String replaceId(String id){
+        return id.replace("$", "S").replace("_", "L").replace("-", "H");
     }
 
     public CompController(FilesController files) {

@@ -19,7 +19,7 @@ parser code {:
 
 terminal
 // NOMBRES DE ACCIONES
-CONSULT, SITE_VISITS, PAGE_VISITS, POPULAR_PAGES, COMPONENT, COMMA, SEMICOLON, TITLE, PARAGRAPH, IMG, VID, MENU, PATH;
+CONSULT, SITE_VISITS, PAGE_VISITS, POPULAR_PAGES, COMPONENT, COMMA, SEMICOLON, TITLE, PARAGRAPH, IMG, VID, MENU, PATH, ALL;
 
 nonterminal consult, report, sites, pages, popular, components, paths, _paths, comp_types;
 
@@ -40,7 +40,7 @@ pages ::= PAGE_VISITS paths:p {:RESULT = Report.builder().path("").type(ReportTy
 
 popular ::= POPULAR_PAGES PATH:p {:RESULT = Report.builder().path((String)p).type(ReportType.POPULAR_PAGES).paths(new ArrayList()).build();:};
 
-popular ::= COMPONENT comp_types:t PATH:p {:RESULT = Report.builder().compType((ComponentType)t).path((String)p).type(ReportType.COMPONENT).paths(new ArrayList()).build();:};
+components ::= COMPONENT comp_types:t PATH:p {:RESULT = Report.builder().compType((ComponentType)t).path((String)p).type(ReportType.COMPONENT).paths(new ArrayList()).build();:};
 
 paths ::= PATH:p _paths:ps {: List<String> paths = (List<String>) ps;
             paths.add((String)p);
@@ -54,4 +54,5 @@ comp_types ::= TITLE {:RESULT = ComponentType.TITLE;:}
     | PARAGRAPH {:RESULT = ComponentType.PARAGRAPH;:}
     | IMG {:RESULT = ComponentType.IMG;:}
     | VID  {:RESULT = ComponentType.VIDEO;:}
-    | MENU {:RESULT = ComponentType.MENU;:};
+    | MENU {:RESULT = ComponentType.MENU;:}
+    | ALL {:RESULT = ComponentType.ALL;:};

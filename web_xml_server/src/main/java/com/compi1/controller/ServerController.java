@@ -41,7 +41,7 @@ public class ServerController {
                         }
                         String[] parts = request.toString().split("~");
                         if (parts.length == 2) {
-                            String content = parts[1];
+                            String content = parts[1].trim();
                             handlePOST(content, firstLine, out);
                         }
                     }
@@ -57,7 +57,7 @@ public class ServerController {
     }
 
     private void handleGET(String reqLine, PrintWriter out){
-        String url = reqLine.split(" ")[1].replace('$', 'S').replace('_', 'Z').replace('-', 'H');;
+        String url = reqLine.split(" ")[1];
         String[] urlParts = url.split("/");
         if (urlParts.length>3){ out.println("HTTP/1.1 400 Bad Request"); return; }
         String site;

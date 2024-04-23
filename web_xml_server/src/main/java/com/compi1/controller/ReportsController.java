@@ -1,6 +1,7 @@
 package com.compi1.controller;
 
 import com.compi1.model.sites.Component;
+import com.compi1.model.sites.ComponentType;
 import com.compi1.model.sites.Page;
 import com.compi1.model.stats.Report;
 
@@ -45,11 +46,30 @@ public class ReportsController {
                 if (!files.siteIdExists(site)) throw new RuntimeException("ID de Sitio no encontrado: "+site);
                 if (!files.pageIdExists(pageStr)) throw new RuntimeException("ID de Pagina no encontrado: "+pageStr);
                 Page page = files.getPage(pageStr);
-                int i = 0;
-                for (Component c: page.getComponents()) {
-                    if (c.getType().equals(report.getCompType())) i++;
+                if (report.getCompType().equals(ComponentType.ALL)){
+                    int title = 0, paragraph = 0, img = 0, video = 0, menu = 0;
+                    for (Component c: page.getComponents()) {
+                        switch (c.getType()){
+                            case TITLE -> title++;
+                            case PARAGRAPH -> paragraph++;
+                            case IMG -> img++;
+                            case VIDEO -> video++;
+                            case MENU -> menu++;
+                        }
+                    }
+                    resp.append("Cantidad de componentes en ").append(report.getPath()).append(": \n")
+                            .append("\tTITULO: ").append(title).append("\n")
+                            .append("\tPARRAFO: ").append(paragraph).append("\n")
+                            .append("\tIMAGEN: ").append(img).append("\n")
+                            .append("\tVIDEO: ").append(video).append("\n")
+                            .append("\tMENU: ").append(menu).append("\n");
+                } else {
+                    int i = 0;
+                    for (Component c: page.getComponents()) {
+                        if (c.getType().equals(report.getCompType())) i++;
+                    }
+                    resp.append("Cantidad de componentes tipo [").append(report.getCompType().name()).append("] en ").append(report.getPath()).append(": ").append(i);
                 }
-                resp.append("Cantidad de componentes tipo [").append(report.getCompType().name()).append("] en ").append(report.getPath()).append(": ").append(i);
             }
         }
         return resp.toString();
